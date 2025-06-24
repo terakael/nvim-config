@@ -119,6 +119,13 @@ return {
       end,
       desc = 'Debug: Restore UI layout',
     },
+    {
+      '<F8>',
+      function()
+        require('dap').repl.toggle({}, 'belowright split | resize ' .. math.floor(vim.o.lines * 0.25))
+      end,
+      desc = 'Debug: Toggle REPL at bottom',
+    },
   },
   config = function()
     local dap = require 'dap'
