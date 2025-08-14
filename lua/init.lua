@@ -195,6 +195,14 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- Move lines up and down with Alt+j/k
+vim.keymap.set('n', '<M-j>', ':m .+1<CR>==', { desc = 'Move line down' })
+vim.keymap.set('n', '<M-k>', ':m .-2<CR>==', { desc = 'Move line up' })
+vim.keymap.set('i', '<M-j>', '<Esc>:m .+1<CR>==gi', { desc = 'Move line down' })
+vim.keymap.set('i', '<M-k>', '<Esc>:m .-2<CR>==gi', { desc = 'Move line up' })
+vim.keymap.set('v', '<M-j>', ':m \'>+1<CR>gv=gv', { desc = 'Move selection down' })
+vim.keymap.set('v', '<M-k>', ':m \'<-2<CR>gv=gv', { desc = 'Move selection up' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -402,6 +410,11 @@ require('lazy').setup({
             '__pycache__',
             '.mypy_cache',
             '.git',
+          },
+          mappings = {
+            n = {
+              ["x"] = require('telescope.actions').delete_buffer,
+            },
           },
         },
         extensions = {
