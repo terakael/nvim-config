@@ -217,6 +217,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -244,6 +245,23 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   'mg979/vim-visual-multi', -- Multiple cursors support
+  {
+    'folke/snacks.nvim',
+    priority = 1000,
+    lazy = false,
+    opts = {
+      animate = { enabled = true },
+      scroll = {
+        enabled = true,
+        animate = {
+          duration = { step = 10, total = 100 },
+          easing = "linear",
+        },
+      },
+      indent = { enabled = true },
+      gitbrowse = { enabled = true },
+    },
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -351,7 +369,6 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -403,17 +420,23 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
-        -- pickers = {}
+        pickers = {
+          lsp_document_symbols = {
+            -- theme = 'dropdown',
+            symbols = nil,
+            ignore_symbols = nil,
+          },
+        },
         defaults = {
           file_ignore_patterns = {
-            '.venv',
-            '__pycache__',
-            '.mypy_cache',
-            '.git',
+            '^%.venv/',
+            '/__pycache__/',
+            '/%.mypy_cache/',
+            '^%.git/',
           },
           mappings = {
             n = {
-              ["x"] = require('telescope.actions').delete_buffer,
+              ["d"] = require('telescope.actions').delete_buffer,
             },
           },
         },
@@ -444,6 +467,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>gs', function()
         builtin.git_status { git_icons = { changed = 'M', added = 'A', deleted = 'D', renamed = 'R', untracked = '?' } }
       end, { desc = '[G]it [S]tatus' })
+      vim.keymap.set('n', '<leader>gb', function()
+        require('snacks').gitbrowse()
+      end, { desc = '[G]it [B]rowse' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
@@ -692,6 +718,7 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
         'pyright',
+        'sql-formatter', -- Used to format SQL code
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -748,11 +775,17 @@ require('lazy').setup({
         json = { 'prettierd', 'prettier', stop_after_first = true },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        sql = { 'sql-formatter' },
       },
       formatters = {
         prettier = {
           command = 'npx',
           args = { 'prettier', '--stdin-filepath', '$FILENAME' },
+          stdin = true,
+        },
+        ['sql-formatter'] = {
+          command = vim.fn.stdpath('data') .. '/mason/bin/sql-formatter',
+          args = { '--language', 'bigquery' },
           stdin = true,
         },
       },
