@@ -200,8 +200,8 @@ vim.keymap.set('n', '<M-j>', ':m .+1<CR>==', { desc = 'Move line down' })
 vim.keymap.set('n', '<M-k>', ':m .-2<CR>==', { desc = 'Move line up' })
 vim.keymap.set('i', '<M-j>', '<Esc>:m .+1<CR>==gi', { desc = 'Move line down' })
 vim.keymap.set('i', '<M-k>', '<Esc>:m .-2<CR>==gi', { desc = 'Move line up' })
-vim.keymap.set('v', '<M-j>', ':m \'>+1<CR>gv=gv', { desc = 'Move selection down' })
-vim.keymap.set('v', '<M-k>', ':m \'<-2<CR>gv=gv', { desc = 'Move selection up' })
+vim.keymap.set('v', '<M-j>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+vim.keymap.set('v', '<M-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -216,7 +216,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
-
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -255,7 +254,7 @@ require('lazy').setup({
         enabled = true,
         animate = {
           duration = { step = 10, total = 100 },
-          easing = "linear",
+          easing = 'linear',
         },
       },
       indent = { enabled = true },
@@ -425,6 +424,8 @@ require('lazy').setup({
             -- theme = 'dropdown',
             symbols = nil,
             ignore_symbols = nil,
+            symbol_width = 60, -- Width of the symbol name column (default: 25)
+            symbol_type_width = 12, -- Width of the symbol type column (default: auto)
           },
         },
         defaults = {
@@ -436,7 +437,7 @@ require('lazy').setup({
           },
           mappings = {
             n = {
-              ["d"] = require('telescope.actions').delete_buffer,
+              ['d'] = require('telescope.actions').delete_buffer,
             },
           },
         },
@@ -781,7 +782,7 @@ require('lazy').setup({
           stdin = true,
         },
         ['sql-formatter'] = {
-          command = vim.fn.stdpath('data') .. '/mason/bin/sql-formatter',
+          command = vim.fn.stdpath 'data' .. '/mason/bin/sql-formatter',
           args = { '--language', 'bigquery' },
           stdin = true,
         },
