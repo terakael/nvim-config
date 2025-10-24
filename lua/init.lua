@@ -245,6 +245,24 @@ require('lazy').setup({
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   'mg979/vim-visual-multi', -- Multiple cursors support
   {
+    'chentoast/marks.nvim',
+    opts = {
+      -- default_mappings = true, -- Use default keymaps
+      builtin_marks = { '.', '<', '>', '^' }, -- Show these built-in marks
+      cyclic = true, -- Whether movements cycle back to beginning/end of buffer
+      force_write_shada = false,
+      refresh_interval = 250,
+      sign_priority = { lower = 10, upper = 15, builtin = 8, bookmark = 20 },
+      excluded_filetypes = {},
+      -- Customize mark signs in gutter
+      bookmark_0 = {
+        sign = '⚑',
+        virt_text = '',
+      },
+      mappings = {},
+    },
+  },
+  {
     'folke/snacks.nvim',
     priority = 1000,
     lazy = false,
@@ -420,12 +438,48 @@ require('lazy').setup({
         --   },
         -- },
         pickers = {
+          buffers = {
+            mappings = {
+              n = {
+                ['d'] = require('telescope.actions').delete_buffer,
+              },
+            },
+          },
+          marks = {
+            mappings = {
+              n = {
+                ['d'] = function(prompt_bufnr)
+                  local actions = require 'telescope.actions'
+                  local action_state = require 'telescope.actions.state'
+                  local selection = action_state.get_selected_entry()
+                  if selection then
+                    -- Extract just the mark character (first field in display)
+                    local mark = selection.mark
+                    if mark and mark:match '^[a-zA-Z]$' then
+                      vim.cmd('delmarks ' .. mark)
+                      actions.close(prompt_bufnr)
+                      -- Reopen marks picker to show updated list
+                      vim.schedule(function()
+                        require('telescope.builtin').marks { mark_type = 'local' }
+                      end)
+                    end
+                  end
+                end,
+              },
+            },
+          },
           lsp_document_symbols = {
             -- theme = 'dropdown',
             symbols = nil,
             ignore_symbols = nil,
             symbol_width = 60, -- Width of the symbol name column (default: 25)
             symbol_type_width = 12, -- Width of the symbol type column (default: auto)
+          },
+          git_commits = {
+            git_command = { 'git', 'log', '--pretty=%h %ad %an %s', '--date=short', '--', '.' },
+          },
+          git_bcommits = {
+            git_command = { 'git', 'log', '--pretty=%h %ad %an %s', '--date=short' },
           },
         },
         defaults = {
@@ -434,11 +488,6 @@ require('lazy').setup({
             '/__pycache__/',
             '/%.mypy_cache/',
             '^%.git/',
-          },
-          mappings = {
-            n = {
-              ['d'] = require('telescope.actions').delete_buffer,
-            },
           },
         },
         extensions = {
@@ -465,12 +514,15 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader>sm', builtin.marks, { desc = '[S]earch [M]arks' })
       vim.keymap.set('n', '<leader>gs', function()
         builtin.git_status { git_icons = { changed = 'M', added = 'A', deleted = 'D', renamed = 'R', untracked = '?' } }
       end, { desc = '[G]it [S]tatus' })
       vim.keymap.set('n', '<leader>gb', function()
         require('snacks').gitbrowse()
       end, { desc = '[G]it [B]rowse' })
+      vim.keymap.set('n', '<leader>gc', builtin.git_commits, { desc = '[G]it [C]ommits' })
+      vim.keymap.set('n', '<leader>gC', builtin.git_bcommits, { desc = '[G]it Buffer [C]ommits' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
@@ -1009,7 +1061,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
