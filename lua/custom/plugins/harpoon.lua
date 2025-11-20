@@ -7,13 +7,13 @@ return {
     harpoon:setup()
 
     -- Basic keymaps
-    vim.keymap.set('n', '<leader>a', function()
+    vim.keymap.set('n', '<leader>ha', function()
       harpoon:list():add()
-    end, { desc = 'Harpoon: [A]dd file' })
+    end, { desc = '[H]arpoon: [A]dd file' })
 
-    vim.keymap.set('n', '<C-e>', function()
+    vim.keymap.set('n', '<leader>hm', function()
       harpoon.ui:toggle_quick_menu(harpoon:list())
-    end, { desc = 'Harpoon: Toggle quick menu' })
+    end, { desc = '[H]arpoon: Toggle [M]enu' })
 
     -- Navigate to harpooned files
     vim.keymap.set('n', '<leader>1', function()
