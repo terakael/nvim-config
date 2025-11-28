@@ -191,6 +191,20 @@ vim.opt.foldlevel = 99
 -- Automatically reload files changed outside of Neovim
 vim.opt.autoread = true
 
+-- Terminal handling for tmux/multiplexers
+vim.opt.termguicolors = true
+vim.opt.title = true
+
+-- Fix rendering issues in tmux/multiplexers
+if vim.env.TMUX then
+  vim.opt.ttimeoutlen = 10
+  -- Force redraw on focus to fix visual artifacts
+  vim.api.nvim_create_autocmd({ 'FocusGained', 'TermResponse' }, {
+    pattern = '*',
+    command = 'redraw!',
+  })
+end
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -1001,6 +1015,9 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter-textobjects',
+    },
     config = function()
       -- Enable treesitter highlighting for all filetypes
       vim.api.nvim_create_autocmd('FileType', {
@@ -1019,6 +1036,59 @@ require('lazy').setup({
           end
         end,
       })
+
+      -- Configure treesitter
+      require('nvim-treesitter.configs').setup {
+        -- Textobjects configuration
+        textobjects = {
+          select = {
+            enable = true,
+            lookahead = true, -- Automatically jump forward to textobj
+            keymaps = {
+              -- You can use the capture groups defined in textobjects.scm
+              ['af'] = '@function.outer',
+              ['if'] = '@function.inner',
+              ['ac'] = '@class.outer',
+              ['ic'] = '@class.inner',
+              ['aa'] = '@parameter.outer',
+              ['ia'] = '@parameter.inner',
+            },
+          },
+          move = {
+            enable = true,
+            set_jumps = true, -- Add jumps to the jumplist
+            goto_next_start = {
+              [']f'] = '@function.outer',
+              [']c'] = '@class.outer',
+              [']a'] = '@parameter.inner',
+            },
+            goto_next_end = {
+              [']F'] = '@function.outer',
+              [']C'] = '@class.outer',
+              [']A'] = '@parameter.inner',
+            },
+            goto_previous_start = {
+              ['[f'] = '@function.outer',
+              ['[c'] = '@class.outer',
+              ['[a'] = '@parameter.inner',
+            },
+            goto_previous_end = {
+              ['[F'] = '@function.outer',
+              ['[C'] = '@class.outer',
+              ['[A'] = '@parameter.inner',
+            },
+          },
+          swap = {
+            enable = true,
+            swap_next = {
+              ['<leader>a'] = '@parameter.inner',
+            },
+            swap_previous = {
+              ['<leader>A'] = '@parameter.inner',
+            },
+          },
+        },
+      }
     end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
